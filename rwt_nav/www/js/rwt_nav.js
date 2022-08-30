@@ -27,8 +27,9 @@ $(function() {
     });
   };
 
-  var ros = new ROSLIB.Ros();
-  ros.install_config_button("config-button", true, 9090);
+  var ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+  });
 
   var map_div_width = $("#map").width();
   var viewer = new ROS2D.Viewer({
@@ -42,17 +43,19 @@ $(function() {
       ros : ros,
       rootObject : viewer.scene,
       viewer : viewer,
-      serverName : '/move_base',
+      serverName : '/slamware_ros_sdk_server_node/map',
       withOrientation : true
   });
 
   ros.on("connection", function() {
-    ros.getTopicsForType('sensor_msgs/Image', function(image_topics) {
-      image_topics.sort();
-      _.map(image_topics, function(topic) {
-        $("#image-topic-select").append('<option value="' + topic + '">' + topic + "</option>");
-      });
-    });
+    console.log("connected")
+
+    // ros.getTopicsForType('sensor_msgs/Image', function(image_topics) {
+    //   image_topics.sort();
+    //   _.map(image_topics, function(topic) {
+    //     $("#image-topic-select").append('<option value="' + topic + '">' + topic + "</option>");
+    //   });
+    // });
 
     var mouseDown = false;
     var zoomKey = false;
@@ -105,29 +108,30 @@ $(function() {
   });
 
   ros.on("close", function() {
-    $("#image-topic-select").empty();
+    //$("#image-topic-select").empty();
+    console.log("closed")
   });
 
-  var mjpeg_canvas = null;
-  var current_image_topic = null;
-  $("#image-topic-form").submit(function(e) {
-    if (mjpeg_canvas) {
-      // remove the canvas here
-      mjpeg_canvas = null;
-      $("#canvas-area canvas").remove();
-    }
-    e.preventDefault();
-    var topic = $("#image-topic-select").val();
-    // first of all, subscribe the topic and detect the width/height
-    var div_width = $("#canvas-area").width();
-    current_image_topic = topic;
-    mjpeg_canvas = new MJPEGCANVAS.Viewer({
-      divID : "canvas-area",
-      host : ros.url().hostname,
-      topic : topic,
-      width: div_width,
-      height: 480 * div_width / 640.0
-    });
-    return false;
-  });
+  // var mjpeg_canvas = null;
+  // var current_image_topic = null;
+  // $("#image-topic-form").submit(function(e) {
+  //   if (mjpeg_canvas) {
+  //     // remove the canvas here
+  //     mjpeg_canvas = null;
+  //     $("#canvas-area canvas").remove();
+  //   }
+  //   e.preventDefault();
+  //   var topic = $("#image-topic-select").val();
+  //   // first of all, subscribe the topic and detect the width/height
+  //   var div_width = $("#canvas-area").width();
+  //   current_image_topic = topic;
+  //   mjpeg_canvas = new MJPEGCANVAS.Viewer({
+  //     divID : "canvas-area",
+  //     host : ros.url().hostname,
+  //     topic : topic,
+  //     width: div_width,
+  //     height: 480 * div_width / 640.0
+  //   });
+  //   return false;
+  // });
 });
